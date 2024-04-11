@@ -1,64 +1,42 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[1]:
-
-
 import pandas as pd
+import streamlit as st
 import plotly.express as px
-from ipywidgets import interact, Dropdown 
 
-he_sfg = pd.read_csv('he_sfg.csv')  # Adjust the file path as per your data
+# Load data
+@st.cache_data
+def load_data(filename):
+    return pd.read_csv(filename)
 
-color_options = ['SwM', 'BB_SwM', 'FB_SwM', 'IZ_SwM']
-
-def update_plot(color_variable):
-    fig = px.scatter(he_sfg, hover_data=['player'], x='VSA', y='SBA', color=color_variable, color_continuous_scale='Oranges')
+# Define function to update plot
+def update_plot(df, color_variable, title):
+    fig = px.scatter(df, hover_data=['player'], x='VSA', y='SBA', color=color_variable, color_continuous_scale='Oranges')
     fig.update_layout(
-        title='SFG Hitters',
+        title=title,
         xaxis=dict(title='VSA'),
         yaxis=dict(title='SBA')
     )
-    fig.show()
+    st.plotly_chart(fig)
 
-dropdown = Dropdown(
-    options=color_options,
-    description='Colored By:'
-)
+def main():
+    st.title('SFG Hitters vs MLB Hitters')
 
-interact(update_plot, color_variable=dropdown)
+    # Load data
+    he_sfg = load_data('he_sfg.csv')
+    he_all = load_data('he_all.csv')
 
+    # Define color options
+    color_options = ['SwM', 'BB_SwM', 'FB_SwM', 'IZ_SwM']
 
-# In[2]:
+    # Select color variable
+    color_variable = st.selectbox('Colored By:', color_options)
 
+    # Update plot for SFG Hitters
+    st.subheader('SFG Hitters')
+    update_plot(he_sfg, color_variable, 'SFG Hitters')
 
-import pandas as pd
-import plotly.express as px
-from ipywidgets import interact, Dropdown 
+    # Update plot for MLB Hitters
+    st.subheader('MLB Hitters')
+    update_plot(he_all, color_variable, 'MLB Hitters')
 
-he_all = pd.read_csv('he_all.csv')  # Adjust the file path as per your data
-
-color_options = ['SwM', 'BB_SwM', 'FB_SwM', 'IZ_SwM']
-
-def update_plot(color_variable):
-    fig = px.scatter(he_all, hover_data=['player'], x='VSA', y='SBA', color=color_variable, color_continuous_scale='Oranges')
-    fig.update_layout(
-        title='MLB Hitters',
-        xaxis=dict(title='VSA'),
-        yaxis=dict(title='SBA')
-    )
-    fig.show()
-
-dropdown = Dropdown(
-    options=color_options,
-    description='Colored By:'
-)
-
-interact(update_plot, color_variable=dropdown)
-
-
-# In[ ]:
-
-
-
-
+if __name__ == "__main__":
+    main()
